@@ -2,8 +2,16 @@ import SportCard from "@/components/SportCard";
 import axios from "axios";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; 
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Sport {
   id: string;
@@ -14,6 +22,8 @@ interface Sport {
 
 export default function HomeScreen() {
   const [sports, setSports] = useState<Sport[]>([]);
+  const [filteredSports, setFilteredSports] = useState<Sport[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,47 +34,56 @@ export default function HomeScreen() {
       })
       .then((response) => {
         setSports(response.data);
+        setFilteredSports(response.data);
         setLoading(false);
       })
-
       .catch((err) => {
-        console.error("API 9_error :", err.message);
-        setError("m9drtch ntconnecta ");
+        console.error("API error:", err.message);
+        setError("m9drtch ntconnecta");
         setLoading(false);
       });
   }, []);
 
+  useEffect(() => {
+    const filtered = sports.filter((item) =>
+      item.name.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredSports(filtered);
+  }, [search, sports]);
+
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#1a1a1a" />
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" color="green" />
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <Text style={{ color: "red", textAlign: "center", padding: 20 }}>
-          {error}
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (!sports || sports.length === 0) {
-    return (
-      <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <Text>No sports available.</Text>
+      <SafeAreaView style={styles.center}>
+        <Text style={{ color: "red" }}>{error}</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      
+
+      {}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#666" />
+        <TextInput
+          placeholder="Search sport..."
+          value={search}
+          onChangeText={setSearch}
+          style={styles.searchInput}
+        />
+      </View>
+
+      {}
       <FlatList
-        data={sports}
+        data={filteredSports}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SportCard
@@ -87,12 +106,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#cbd5c5",
   },
-  centerContent: {
+
+  center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   listContent: {
     padding: 20,
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    marginHorizontal: 20,
+    marginTop: 15,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    height: 45,
+  },
+
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
   },
 });
