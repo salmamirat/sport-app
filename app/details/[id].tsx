@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  /////////////
+
     ActivityIndicator,
     Image,
     ScrollView,
